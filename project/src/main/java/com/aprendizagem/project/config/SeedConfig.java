@@ -1,8 +1,9 @@
 package com.aprendizagem.project.config;
 
-import com.aprendizagem.project.usuarios.Aluno;
-import com.aprendizagem.project.usuarios.Professor;
-import com.aprendizagem.project.usuarios.Usuario;
+import com.aprendizagem.project.usuarios.factory.AlunoFactory;
+import com.aprendizagem.project.usuarios.factory.ProfessorFactory;
+import com.aprendizagem.project.usuarios.factory.UsuarioFactory;
+import com.aprendizagem.project.usuarios.factory.VisitanteFactory;
 import com.aprendizagem.project.usuarios.repository.UsuarioRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
@@ -20,14 +21,12 @@ public class SeedConfig implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        Usuario u1 = new Aluno();
-        u1.setNome("Maria");
-        u1.setEmail("maria@email.com");
+        UsuarioFactory factory1 = new AlunoFactory();
+        UsuarioFactory factory2 = new ProfessorFactory();
+        UsuarioFactory factory3 = new VisitanteFactory();
 
-        Usuario u2 = new Professor();
-        u2.setNome("Alex");
-        u2.setEmail("alex@email.com");
-
-        usuarioRepository.saveAll(Arrays.asList(u1, u2));
+        usuarioRepository.saveAll(Arrays.asList(factory1.criarUsuario("Maria Green", "maria@gmail.com"),
+                factory2.criarUsuario("Bob Brown", "bob@gmail.com"),
+                factory3.criarUsuario("Rosa Pink", "rosa@gmail.com")));
     }
 }

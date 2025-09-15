@@ -10,6 +10,6 @@ import lombok.Setter;
 @Entity
 @DiscriminatorValue("ALUNO")
 public class Aluno extends Usuario {
-    private int pontos = 0;
-    private int nivel = 1;
+    private int pontos;
+    private int nivel;
 }
