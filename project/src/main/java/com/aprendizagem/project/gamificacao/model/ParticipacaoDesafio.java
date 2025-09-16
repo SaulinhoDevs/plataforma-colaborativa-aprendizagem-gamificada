@@ -26,9 +26,6 @@ public class ParticipacaoDesafio {
     @OneToMany(cascade = CascadeType.ALL)
     private List<RespostaQuestao> respostas;
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
-    private List<com.aprendizagem.project.gamificacao.model.MedalhaEntity> medalhas;
-
     // resultados calculados
     private int pontos;
     private long tempoTotalMs;

@@ -19,5 +19,6 @@ public class MedalhaEntity {
     private int pontos;
 
     @ManyToOne
+    @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 }

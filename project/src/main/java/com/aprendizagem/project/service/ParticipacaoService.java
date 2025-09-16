@@ -1,13 +1,13 @@
 package com.aprendizagem.project.service;
 
+import com.aprendizagem.project.gamificacao.model.ParticipacaoDesafio;
+import com.aprendizagem.project.repository.ParticipacaoDesafioRepository;
+import com.aprendizagem.project.gamificacao.model.MedalhaEntity;
+import com.aprendizagem.project.repository.MedalhaRepository;
 import com.aprendizagem.project.gamificacao.decorator.DoubleXPDecorator;
 import com.aprendizagem.project.gamificacao.decorator.StreakBonusDecorator;
-import com.aprendizagem.project.gamificacao.model.MedalhaEntity;
-import com.aprendizagem.project.gamificacao.model.ParticipacaoDesafio;
 import com.aprendizagem.project.gamificacao.strategy.PontuacaoPorPesoStrategy;
 import com.aprendizagem.project.gamificacao.strategy.PontuacaoStrategy;
-import com.aprendizagem.project.repository.MedalhaRepository;
-import com.aprendizagem.project.repository.ParticipacaoDesafioRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public class ParticipacaoService {
         // Estratégia base
         PontuacaoStrategy strategy = new PontuacaoPorPesoStrategy();
 
-        // Aplicando decorators (pode ser configurável futuramente)
+        // Decorators
         strategy = new StreakBonusDecorator(strategy);
         strategy = new DoubleXPDecorator(strategy);
 
@@ -37,7 +37,7 @@ public class ParticipacaoService {
         return participacaoRepository.save(participacao);
     }
 
-    // Ranking de um desafio específico + atribuição de medalhas
+    //Ranking de um desafio específico + atribuição de medalhas
     public List<ParticipacaoDesafio> rankingPorDesafio(Long desafioId) {
         List<ParticipacaoDesafio> ranking = participacaoRepository.findRankingByDesafio(desafioId);
 
@@ -48,11 +48,11 @@ public class ParticipacaoService {
         return ranking;
     }
 
-    // Ranking geral (todos os desafios) + atribuição de taças
+    //Ranking geral (todos os desafios) + atribuição de taças
     public List<ParticipacaoDesafio> rankingGeral() {
         List<ParticipacaoDesafio> ranking = participacaoRepository.findAll();
 
-        // somar pontos por aluno
+        // ordena pelo total de pontos
         ranking.sort((a, b) -> Integer.compare(b.getPontos(), a.getPontos()));
 
         if (!ranking.isEmpty()) {
@@ -63,9 +63,9 @@ public class ParticipacaoService {
     }
 
     private void atribuirMedalhas(List<ParticipacaoDesafio> ranking) {
-        if (ranking.size() > 0) salvarMedalha("MEDALHA", "Ouro", 30, ranking.get(0));
-        if (ranking.size() > 1) salvarMedalha("MEDALHA", "Prata", 20, ranking.get(1));
-        if (ranking.size() > 2) salvarMedalha("MEDALHA", "Bronze", 10, ranking.get(2));
+        if (ranking.size() > 0) salvarMedalha("MEDALHA", "Medalha de Ouro", 30, ranking.get(0));
+        if (ranking.size() > 1) salvarMedalha("MEDALHA", "Medalha de Prata", 20, ranking.get(1));
+        if (ranking.size() > 2) salvarMedalha("MEDALHA", "Medalha de Bronze", 10, ranking.get(2));
     }
 
     private void atribuirTacas(List<ParticipacaoDesafio> ranking) {

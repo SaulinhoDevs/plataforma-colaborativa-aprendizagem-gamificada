@@ -1,11 +1,13 @@
 package com.aprendizagem.project.usuarios;
 
 import com.aprendizagem.project.enums.TipoUsuario;
+import com.aprendizagem.project.gamificacao.model.MedalhaEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -42,4 +44,8 @@ public abstract class Usuario {
     public void preUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private List<MedalhaEntity> medalhas;
+
 }
