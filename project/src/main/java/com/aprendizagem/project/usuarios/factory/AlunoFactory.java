@@ -2,7 +2,7 @@ package com.aprendizagem.project.usuarios.factory;
 
 import com.aprendizagem.project.usuarios.Aluno;
 import com.aprendizagem.project.usuarios.Usuario;
-import com.aprendizagem.project.usuarios.enums.TipoUsuario;
+import com.aprendizagem.project.enums.TipoUsuario;
 
 public class AlunoFactory extends UsuarioFactory {
     @Override

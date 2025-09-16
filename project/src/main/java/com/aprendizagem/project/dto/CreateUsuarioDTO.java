@@ -1,4 +1,4 @@
-package com.aprendizagem.project.usuarios.dto;
+package com.aprendizagem.project.dto;
 
 import lombok.Getter;
 import lombok.Setter;

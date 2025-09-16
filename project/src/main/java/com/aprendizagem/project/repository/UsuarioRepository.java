@@ -1,4 +1,4 @@
-package com.aprendizagem.project.usuarios.repository;
+package com.aprendizagem.project.repository;
 
 import com.aprendizagem.project.usuarios.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;

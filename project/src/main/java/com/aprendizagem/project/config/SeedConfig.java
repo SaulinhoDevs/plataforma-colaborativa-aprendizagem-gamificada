@@ -4,7 +4,7 @@ import com.aprendizagem.project.usuarios.Usuario;
 import com.aprendizagem.project.usuarios.factory.AlunoFactory;
 import com.aprendizagem.project.usuarios.factory.ProfessorFactory;
 import com.aprendizagem.project.usuarios.factory.VisitanteFactory;
-import com.aprendizagem.project.usuarios.repository.UsuarioRepository;
+import com.aprendizagem.project.repository.UsuarioRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 

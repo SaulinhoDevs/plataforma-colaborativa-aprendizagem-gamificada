@@ -2,7 +2,7 @@ package com.aprendizagem.project.controllers;
 
 import com.aprendizagem.project.service.UsuarioService;
 import com.aprendizagem.project.usuarios.Usuario;
-import com.aprendizagem.project.usuarios.dto.CreateUsuarioDTO;
+import com.aprendizagem.project.dto.CreateUsuarioDTO;
 import com.aprendizagem.project.usuarios.factory.AlunoFactory;
 import com.aprendizagem.project.usuarios.factory.ProfessorFactory;
 import com.aprendizagem.project.usuarios.factory.UsuarioFactory;

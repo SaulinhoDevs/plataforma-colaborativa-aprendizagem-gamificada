@@ -1,6 +1,6 @@
 package com.aprendizagem.project.usuarios;
 
-import com.aprendizagem.project.usuarios.enums.TipoUsuario;
+import com.aprendizagem.project.enums.TipoUsuario;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

@@ -1,7 +1,7 @@
 package com.aprendizagem.project.service;
 
 import com.aprendizagem.project.usuarios.Usuario;
-import com.aprendizagem.project.usuarios.repository.UsuarioRepository;
+import com.aprendizagem.project.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
