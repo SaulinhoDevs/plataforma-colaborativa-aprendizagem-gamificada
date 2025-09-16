@@ -23,8 +23,14 @@ public class ParticipacaoController {
         return ResponseEntity.ok(participacaoService.registrarParticipacao(participacao));
     }
 
+
     @GetMapping("/ranking/{desafioId}")
-    public ResponseEntity<List<ParticipacaoDesafio>> ranking(@PathVariable Long desafioId) {
+    public ResponseEntity<List<ParticipacaoDesafio>> rankingDesafio(@PathVariable Long desafioId) {
         return ResponseEntity.ok(participacaoService.rankingPorDesafio(desafioId));
+    }
+
+    @GetMapping("/ranking-geral")
+    public ResponseEntity<List<ParticipacaoDesafio>> rankingGeral() {
+        return ResponseEntity.ok(participacaoService.rankingGeral());
     }
 }

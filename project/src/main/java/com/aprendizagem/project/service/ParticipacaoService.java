@@ -1,7 +1,12 @@
 package com.aprendizagem.project.service;
 
+import com.aprendizagem.project.gamificacao.decorator.DoubleXPDecorator;
+import com.aprendizagem.project.gamificacao.decorator.StreakBonusDecorator;
+import com.aprendizagem.project.gamificacao.model.MedalhaEntity;
 import com.aprendizagem.project.gamificacao.model.ParticipacaoDesafio;
 import com.aprendizagem.project.gamificacao.strategy.PontuacaoPorPesoStrategy;
+import com.aprendizagem.project.gamificacao.strategy.PontuacaoStrategy;
+import com.aprendizagem.project.repository.MedalhaRepository;
 import com.aprendizagem.project.repository.ParticipacaoDesafioRepository;
 import org.springframework.stereotype.Service;
 
@@ -11,19 +16,71 @@ import java.util.List;
 public class ParticipacaoService {
 
     private final ParticipacaoDesafioRepository participacaoRepository;
-    private final PontuacaoPorPesoStrategy strategy = new PontuacaoPorPesoStrategy();
+    private final MedalhaRepository medalhaRepository;
 
-    public ParticipacaoService(ParticipacaoDesafioRepository participacaoRepository) {
+    public ParticipacaoService(ParticipacaoDesafioRepository participacaoRepository,
+                               MedalhaRepository medalhaRepository) {
         this.participacaoRepository = participacaoRepository;
+        this.medalhaRepository = medalhaRepository;
     }
 
     public ParticipacaoDesafio registrarParticipacao(ParticipacaoDesafio participacao) {
-        // calcula pontos com a estratégia configurada
+        // Estratégia base
+        PontuacaoStrategy strategy = new PontuacaoPorPesoStrategy();
+
+        // Aplicando decorators (pode ser configurável futuramente)
+        strategy = new StreakBonusDecorator(strategy);
+        strategy = new DoubleXPDecorator(strategy);
+
         strategy.calcularPontuacao(participacao);
+
         return participacaoRepository.save(participacao);
     }
 
+    // Ranking de um desafio específico + atribuição de medalhas
     public List<ParticipacaoDesafio> rankingPorDesafio(Long desafioId) {
-        return participacaoRepository.findRankingByDesafio(desafioId);
+        List<ParticipacaoDesafio> ranking = participacaoRepository.findRankingByDesafio(desafioId);
+
+        if (!ranking.isEmpty()) {
+            atribuirMedalhas(ranking);
+        }
+
+        return ranking;
+    }
+
+    // Ranking geral (todos os desafios) + atribuição de taças
+    public List<ParticipacaoDesafio> rankingGeral() {
+        List<ParticipacaoDesafio> ranking = participacaoRepository.findAll();
+
+        // somar pontos por aluno
+        ranking.sort((a, b) -> Integer.compare(b.getPontos(), a.getPontos()));
+
+        if (!ranking.isEmpty()) {
+            atribuirTacas(ranking);
+        }
+
+        return ranking;
+    }
+
+    private void atribuirMedalhas(List<ParticipacaoDesafio> ranking) {
+        if (ranking.size() > 0) salvarMedalha("MEDALHA", "Ouro", 30, ranking.get(0));
+        if (ranking.size() > 1) salvarMedalha("MEDALHA", "Prata", 20, ranking.get(1));
+        if (ranking.size() > 2) salvarMedalha("MEDALHA", "Bronze", 10, ranking.get(2));
+    }
+
+    private void atribuirTacas(List<ParticipacaoDesafio> ranking) {
+        if (ranking.size() > 0) salvarMedalha("TACA", "Taça de Ouro", 50, ranking.get(0));
+        if (ranking.size() > 1) salvarMedalha("TACA", "Taça de Prata", 40, ranking.get(1));
+        if (ranking.size() > 2) salvarMedalha("TACA", "Taça de Bronze", 30, ranking.get(2));
+    }
+
+    private void salvarMedalha(String tipo, String nome, int pontos, ParticipacaoDesafio participacao) {
+        MedalhaEntity medalha = new MedalhaEntity();
+        medalha.setTipo(tipo);
+        medalha.setNome(nome);
+        medalha.setPontos(pontos);
+        medalha.setUsuario(participacao.getAluno());
+
+        medalhaRepository.save(medalha);
     }
 }

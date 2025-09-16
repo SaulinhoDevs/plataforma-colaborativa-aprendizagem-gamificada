@@ -31,4 +31,9 @@ public class DesafioController {
     public ResponseEntity<Desafio> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(desafioService.buscarPorId(id));
     }
+
+    @PutMapping("/{id}/fechar")
+    public ResponseEntity<Desafio> fechar(@PathVariable Long id) {
+        return ResponseEntity.ok(desafioService.fecharDesafio(id));
+    }
 }
