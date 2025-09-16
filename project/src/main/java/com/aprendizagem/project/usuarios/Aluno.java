@@ -10,6 +10,7 @@ import lombok.Setter;
 @Entity
 @DiscriminatorValue("ALUNO")
 public class Aluno extends Usuario {
-    private int pontos;
-    private int nivel;
+    // cache opcional para performance (atualizar quando salvar resultados)
+    private Integer cachedTotalPoints = 0;
+    private Integer nivel = 1;
 }
