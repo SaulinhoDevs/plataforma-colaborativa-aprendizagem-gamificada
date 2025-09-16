@@ -1,6 +1,6 @@
 package com.aprendizagem.project.service;
 
-import com.aprendizagem.project.desafios.Desafio;
+import com.aprendizagem.project.gamificacao.model.Desafio;
 import com.aprendizagem.project.repository.DesafioRepository;
 import org.springframework.stereotype.Service;
 

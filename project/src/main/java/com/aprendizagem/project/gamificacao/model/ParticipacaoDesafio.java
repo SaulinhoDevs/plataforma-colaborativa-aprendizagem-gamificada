@@ -1,4 +1,4 @@
-package com.aprendizagem.project.desafios;
+package com.aprendizagem.project.gamificacao.model;
 
 import com.aprendizagem.project.usuarios.Usuario;
 import jakarta.persistence.*;
@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,12 +18,19 @@ public class ParticipacaoDesafio {
     private Long id;
 
     @ManyToOne
-    private Usuario aluno; // apenas ALUNO deve participar
+    private Usuario aluno; // só ALUNO participa
 
     @ManyToOne
     private Desafio desafio;
 
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<RespostaQuestao> respostas;
+
+    // resultados calculados
     private int pontos;
+    private long tempoTotalMs;
+    private int maiorSequenciaAcertos;
+    private int acertosPesados;
 
     private LocalDateTime startedAt;
     private LocalDateTime finishedAt;

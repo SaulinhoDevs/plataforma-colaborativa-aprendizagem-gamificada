@@ -1,4 +1,4 @@
-package com.aprendizagem.project.desafios;
+package com.aprendizagem.project.gamificacao.model;
 
 import com.aprendizagem.project.usuarios.Usuario;
 import jakarta.persistence.*;
@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,12 +22,15 @@ public class Desafio {
     @Column(length = 2000)
     private String descricao;
 
-    // Professor que criou
     @ManyToOne
-    private Usuario criador;
+    private Usuario criador; // professor
 
     private LocalDateTime availableFrom;
     private LocalDateTime availableUntil;
 
+    private int notaMaxima = 100;
     private boolean fechado = false;
+
+    @OneToMany(mappedBy = "desafio", cascade = CascadeType.ALL)
+    private List<Questao> questoes;
 }

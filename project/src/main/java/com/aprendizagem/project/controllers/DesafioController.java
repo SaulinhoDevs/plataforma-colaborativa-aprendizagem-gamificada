@@ -1,6 +1,6 @@
 package com.aprendizagem.project.controllers;
 
-import com.aprendizagem.project.desafios.Desafio;
+import com.aprendizagem.project.gamificacao.model.Desafio;
 import com.aprendizagem.project.service.DesafioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
