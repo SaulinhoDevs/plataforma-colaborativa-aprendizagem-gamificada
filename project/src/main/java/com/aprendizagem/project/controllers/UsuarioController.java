@@ -7,6 +7,7 @@ import com.aprendizagem.project.usuarios.factory.AlunoFactory;
 import com.aprendizagem.project.usuarios.factory.ProfessorFactory;
 import com.aprendizagem.project.usuarios.factory.UsuarioFactory;
 import com.aprendizagem.project.usuarios.factory.VisitanteFactory;
+import com.aprendizagem.project.gamificacao.model.MedalhaEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,12 +42,16 @@ public class UsuarioController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Usuario> buscarPorId(@PathVariable Long id) {
-        Usuario u = usuarioService.buscarPorId(id);
-        return ResponseEntity.ok(u);
+        return ResponseEntity.ok(usuarioService.buscarPorId(id));
     }
 
     @GetMapping
     public ResponseEntity<List<Usuario>> listarTodos() {
         return ResponseEntity.ok(usuarioService.listarTodos());
+    }
+
+    @GetMapping("/{id}/conquistas")
+    public ResponseEntity<List<MedalhaEntity>> listarConquistas(@PathVariable Long id) {
+        return ResponseEntity.ok(usuarioService.listarConquistas(id));
     }
 }
