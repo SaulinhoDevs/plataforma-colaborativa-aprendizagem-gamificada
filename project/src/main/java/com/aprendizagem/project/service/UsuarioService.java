@@ -1,40 +1,37 @@
 package com.aprendizagem.project.service;
 
-import com.aprendizagem.project.usuarios.Usuario;
+import com.aprendizagem.project.dto.CadastroRequest;
+import com.aprendizagem.project.model.Usuario;
+import com.aprendizagem.project.model.factory.UsuarioFactory;
 import com.aprendizagem.project.repository.UsuarioRepository;
-import com.aprendizagem.project.gamificacao.model.MedalhaEntity;
-import com.aprendizagem.project.repository.MedalhaRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
-    private final MedalhaRepository medalhaRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UsuarioService(UsuarioRepository usuarioRepository,
-                          MedalhaRepository medalhaRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
-        this.medalhaRepository = medalhaRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    public Usuario buscarPorId(Long id) {
-        return usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com id: " + id));
-    }
+    public Usuario cadastrarUsuario(CadastroRequest request) {
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("As senhas não coincidem.");
+        }
 
-    public List<Usuario> listarTodos() {
-        return usuarioRepository.findAll();
-    }
+        String senhaCriptografada = passwordEncoder.encode(request.getPassword());
 
-    public Usuario salvar(Usuario usuario) {
+        Usuario usuario = UsuarioFactory.criarUsuario(
+                request.getTipo(),
+                request.getNome(),
+                request.getEmail(),
+                senhaCriptografada
+        );
+
         return usuarioRepository.save(usuario);
-    }
-
-    public List<MedalhaEntity> listarConquistas(Long usuarioId) {
-        buscarPorId(usuarioId); // só para validar se existe
-        return medalhaRepository.findByUsuarioId(usuarioId);
     }
 }

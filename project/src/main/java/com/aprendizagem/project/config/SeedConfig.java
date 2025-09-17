@@ -1,10 +1,10 @@
+/*
 package com.aprendizagem.project.config;
 
-import com.aprendizagem.project.usuarios.Usuario;
-import com.aprendizagem.project.usuarios.factory.AlunoFactory;
-import com.aprendizagem.project.usuarios.factory.ProfessorFactory;
-import com.aprendizagem.project.usuarios.factory.VisitanteFactory;
-import com.aprendizagem.project.repository.UsuarioRepository;
+import com.aprendizagem.project.model.Usuario;
+import com.aprendizagem.project.model.factory.AlunoFactory;
+import com.aprendizagem.project.model.factory.ProfessorFactory;
+import com.aprendizagem.project.model.factory.VisitanteFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,3 +31,4 @@ public class SeedConfig implements CommandLineRunner {
         }
     }
 }
+ */
