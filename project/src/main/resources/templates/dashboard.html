@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+</head>
+<body>
+<h1>Bem-vindo ao Dashboard, <span sec:authentication="name">Usuário</span>!</h1>
+<p>Seu tipo: <span sec:authentication="principal.authorities">[ROLE_ALUNO]</span></p>
+
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Sair</button>
+</form>
+</body>
+</html>

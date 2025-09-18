@@ -16,16 +16,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/cadastro/**", "/login/**").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll() // Permite tudo temporariamente
                 )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .permitAll()
-                );
+                .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers.frameOptions().disable())
+                .formLogin(form -> form.disable()) // Desabilita login do Spring
+                .logout(logout -> logout.disable()); // Desabilita logout do Spring
 
         return http.build();
     }
