@@ -22,7 +22,7 @@ public class CadastroController {
     public String mostrarFormulario(Model model) {
         model.addAttribute("cadastroRequest", new CadastroRequest());
         model.addAttribute("tiposUsuario", TipoUsuario.values());
-        return "cadastro"; // ⬅️ Nome do template SEM extensão
+        return "cadastro"; // Nome do template SEM extensão
     }
 
     @PostMapping("/cadastro")
