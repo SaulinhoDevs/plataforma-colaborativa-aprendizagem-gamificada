@@ -16,11 +16,9 @@
             href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Poppins:wght@400;500&display=swap"
             rel="stylesheet">
 
-    <!-- CSS Customizado -->
-    <link rel="stylesheet" href="../static/css/login-cadastro.css">
-
-    <!-- CSS para Animações -->
-    <link rel="stylesheet" href="../static/css/animacoes-login.css">
+    <!-- CSS Customizado com caminhos corrigidos para Thymeleaf -->
+    <link rel="stylesheet" th:href="@{/css/login-cadastro.css}">
+    <link rel="stylesheet" th:href="@{/css/animacoes-login.css}">
 </head>
 
 <body class="py-5">
@@ -78,7 +76,8 @@
                             </form>
                             <footer class="text-center mt-4">
                                 <p class="text-muted mb-0">Não tem uma conta?</p>
-                                <a th:href="@{/cadastro}" class="signup-link">Cadastre-se aqui!</a>
+                                <!-- Adicionada classe para transição JS -->
+                                <a th:href="@{/cadastro}" class="signup-link page-transition-link">Cadastre-se aqui!</a>
                             </footer>
                         </div>
                     </div>
@@ -103,6 +102,10 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
+
+<!-- Script de Transição com caminho corrigido para Thymeleaf -->
+<script th:src="@{/js/transicao.js}"></script>
+
 </body>
 
 </html>
