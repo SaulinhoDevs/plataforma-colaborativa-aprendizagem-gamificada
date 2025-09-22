@@ -1,26 +1,24 @@
 package com.aprendizagem.project.model;
 
-import com.aprendizagem.project.enums.TipoUsuario;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Data
+@EqualsAndHashCode(callSuper = true) // Garante que os campos da superclasse sejam usados no equals/hashCode
+@NoArgsConstructor
 @DiscriminatorValue("ALUNO")
 public class Aluno extends Usuario {
     private int nivel = 1;
 
-    public Aluno() {
+    public Aluno(String nome, String email, String password) {
+        // Corrigido: Chama o construtor da superclasse com os parâmetros corretos.
+        super(nome, email, password);
     }
 
-    public Aluno(String nome, String email, String senha) {
-        super(nome, email, senha, TipoUsuario.ALUNO);
-    }
-
-    public int getNivel() {
-        return nivel;
-    }
-
-    public void setNivel(int nivel) {
-        this.nivel = nivel;
-    }
+    // Getters e setters são gerados pelo @Data do Lombok
 }
+

@@ -1,26 +1,24 @@
 package com.aprendizagem.project.model;
 
-import com.aprendizagem.project.enums.TipoUsuario;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Data
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 @DiscriminatorValue("PROFESSOR")
 public class Professor extends Usuario {
     private String disciplina;
 
-    public Professor() {
+    public Professor(String nome, String email, String password) {
+        // Corrigido: Chama o construtor da superclasse com os parâmetros corretos.
+        super(nome, email, password);
     }
 
-    public Professor(String nome, String email, String senha) {
-        super(nome, email, senha, TipoUsuario.PROFESSOR);
-    }
-
-    public String getDisciplina() {
-        return disciplina;
-    }
-
-    public void setDisciplina(String disciplina) {
-        this.disciplina = disciplina;
-    }
+    // Getters e setters são gerados pelo @Data do Lombok
 }
+

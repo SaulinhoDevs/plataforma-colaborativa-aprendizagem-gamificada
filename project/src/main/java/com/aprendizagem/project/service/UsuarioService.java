@@ -13,7 +13,6 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // Certifique-se de que o construtor está correto
     public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
@@ -23,15 +22,14 @@ public class UsuarioService {
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new IllegalArgumentException("As senhas não coincidem.");
         }
+        if (usuarioRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("O e-mail informado já está em uso.");
+        }
 
         String senhaCriptografada = passwordEncoder.encode(request.getPassword());
 
-        Usuario usuario = UsuarioFactory.criarUsuario(
-                request.getTipo(),
-                request.getNome(),
-                request.getEmail(),
-                senhaCriptografada
-        );
+        // Corrigido: a fábrica agora recebe o request e a senha criptografada separadamente.
+        Usuario usuario = UsuarioFactory.createUsuario(request, senhaCriptografada);
 
         return usuarioRepository.save(usuario);
     }
