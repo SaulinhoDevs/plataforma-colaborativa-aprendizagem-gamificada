@@ -13,10 +13,10 @@ public class RankingItemDTO {
     private String nome;
     private int pontos;
     private String avatarUrl;
+    private boolean isUsuarioAtual; // Campo para identificar o usuário logado
 
     // A anotação @Data do Lombok irá gerar automaticamente:
-    // - getPosicao(), getNome(), getPontos(), getAvatarUrl()
-    // - setPosicao(...), setNome(...), etc.
-    // - E outros métodos como toString(), equals(), hashCode()
+    // - getNome() - que é o que o Thymeleaf precisa
+    // - e todos os outros getters, setters, etc.
 }
 

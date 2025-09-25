@@ -1,13 +1,16 @@
 package com.aprendizagem.project.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(exclude = "pergunta") // MUDANÇA CRÍTICA: Exclui o campo "pergunta" para quebrar o ciclo
 @NoArgsConstructor
 public class Resposta {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -15,9 +18,16 @@ public class Resposta {
     @Column(nullable = false)
     private String texto;
 
+    @Column(nullable = false)
     private boolean correta;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pergunta_id", nullable = false)
+    @JoinColumn(name = "pergunta_id")
     private Pergunta pergunta;
+
+    public Resposta(String texto, boolean correta) {
+        this.texto = texto;
+        this.correta = correta;
+    }
 }
+

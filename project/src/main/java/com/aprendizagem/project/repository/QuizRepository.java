@@ -2,10 +2,13 @@ package com.aprendizagem.project.repository;
 
 import com.aprendizagem.project.model.Quiz;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.EntityGraph;
 
-@Repository
+import java.util.Optional;
+
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
-    // Aqui podemos adicionar métodos de busca customizados no futuro,
-    // como por exemplo: findByCategoria(String categoria);
+
+    // EntityGraph garante fetch de perguntas + respostas em uma só operação
+    @EntityGraph(attributePaths = {"perguntas", "perguntas.respostas"})
+    Optional<Quiz> findWithPerguntasRespostasById(Long id);
 }

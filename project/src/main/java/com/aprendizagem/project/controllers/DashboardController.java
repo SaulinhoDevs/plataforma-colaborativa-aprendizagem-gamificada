@@ -4,57 +4,67 @@ import com.aprendizagem.project.dto.DashboardDataDTO;
 import com.aprendizagem.project.dto.QuizResumoDTO;
 import com.aprendizagem.project.dto.RankingItemDTO;
 import com.aprendizagem.project.dto.UsuarioDTO;
+import com.aprendizagem.project.model.Usuario;
+import com.aprendizagem.project.repository.QuizRepository;
+import com.aprendizagem.project.repository.UsuarioRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.security.Principal;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class DashboardController {
 
-    // Futuramente, injetaremos um service para buscar os dados reais
-    // @Autowired
-    // private DashboardService dashboardService;
+    private final UsuarioRepository usuarioRepository;
+    private final QuizRepository quizRepository;
+
+    public DashboardController(UsuarioRepository usuarioRepository, QuizRepository quizRepository) {
+        this.usuarioRepository = usuarioRepository;
+        this.quizRepository = quizRepository;
+    }
 
     @GetMapping("/dashboard")
     public String getDashboard(Model model, Principal principal) {
         String userEmail = principal.getName();
+        Usuario usuarioLogado = usuarioRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalStateException("Utilizador não encontrado no banco de dados."));
 
-        // **LÓGICA PROVISÓRIA COM DADOS MOCKADOS**
         DashboardDataDTO dashboardData = new DashboardDataDTO();
 
-        // Criar um UsuarioDTO de exemplo - ESTA É A CORREÇÃO
-        UsuarioDTO usuario = new UsuarioDTO();
-        usuario.setNome("Admin"); // Usando um nome de exemplo
-        usuario.setAvatarUrl("https://placehold.co/40x40/9333ea/FFFFFF?text=A");
+        // Mapeia os dados do utilizador logado para o DTO
+        UsuarioDTO usuarioDTO = new UsuarioDTO();
+        usuarioDTO.setNome(usuarioLogado.getNome());
+        usuarioDTO.setAvatarUrl("https://placehold.co/40x40/9333ea/FFFFFF?text=" + usuarioLogado.getNome().substring(0, 1).toUpperCase());
+        dashboardData.setUsuario(usuarioDTO);
 
-        dashboardData.setUsuario(usuario); // Adicionando o usuário ao DTO principal
+        // --- CORREÇÃO PRINCIPAL ---
+        // Busca quizzes reais do banco e mapeia-os para DTOs, passando o ID
+        List<QuizResumoDTO> todosOsQuizzes = quizRepository.findAll().stream()
+                .map(quiz -> new QuizResumoDTO(
+                        quiz.getId(), // A passar o ID do quiz para o DTO
+                        quiz.getTitulo(),
+                        quiz.getCategoria(),
+                        0 // Progresso ainda é fixo, será implementado depois
+                ))
+                .collect(Collectors.toList());
+
+        dashboardData.setNovosQuizzes(todosOsQuizzes);
+        dashboardData.setQuizzesEmProgresso(Collections.emptyList()); // Ainda não temos lógica de progresso
+
+        // Dados de exemplo restantes (serão substituídos no futuro)
         dashboardData.setPontosTotais(1250);
         dashboardData.setQuizzesConcluidos(15);
         dashboardData.setPrecisao(88);
-
-        // Lista de quizzes em progresso
-        dashboardData.setQuizzesEmProgresso(Arrays.asList(
-                new QuizResumoDTO("Capitais da Europa", "Geografia", 60),
-                new QuizResumoDTO("Revolução Francesa", "História", 30)
-        ));
-
-        // Lista de novos quizzes
-        dashboardData.setNovosQuizzes(Arrays.asList(
-                new QuizResumoDTO("Sistema Solar", "Astronomia", 0),
-                new QuizResumoDTO("Biomas Brasileiros", "Biologia", 0)
-        ));
-
-        // Lista de conquistas
         dashboardData.setConquistas(Arrays.asList("🏅", "🌍", "🏆"));
-
-        // Lista de ranking
         dashboardData.setRanking(Arrays.asList(
-                new RankingItemDTO(1, "Ana", 1850, "https://placehold.co/40x40/22c55e/FFFFFF?text=A"),
-                new RankingItemDTO(2, "Você", 1250, usuario.getAvatarUrl()),
-                new RankingItemDTO(3, "Bruno", 980, "https://placehold.co/40x40/3b82f6/FFFFFF?text=B")
+                new RankingItemDTO(1, "Ana", 1850, "https://placehold.co/40x40/22c55e/FFFFFF?text=A", false),
+                new RankingItemDTO(2, "Você", 1250, usuarioDTO.getAvatarUrl(), true),
+                new RankingItemDTO(3, "Bruno", 980, "https://placehold.co/40x40/3b82f6/FFFFFF?text=B", false)
         ));
 
         model.addAttribute("dashboardData", dashboardData);
