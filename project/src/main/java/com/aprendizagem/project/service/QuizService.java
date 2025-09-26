@@ -25,19 +25,22 @@ public class QuizService {
     private final QuizRepository quizRepository;
     private final UsuarioQuizProgressoRepository progressoRepository;
     private final PontuacaoStrategy pontuacaoStrategy;
-    private final QuizCompletionSubject completionSubject; // ADICIONADO: O "Subject"
+    private final QuizCompletionSubject completionSubject;
 
+    /**
+     * O construtor agora injeta o decorador final "streakBonus".
+     * O Spring irá automaticamente montar a cadeia:
+     * StreakBonusDecorator -> PontuacaoPorTempoStrategy -> PontuacaoSimplesStrategy
+     */
     public QuizService(QuizRepository quizRepository,
                        UsuarioQuizProgressoRepository progressoRepository,
-                       @Qualifier("pontuacaoSimples") PontuacaoStrategy pontuacaoStrategy,
-                       QuizCompletionSubject completionSubject, // ADICIONADO: Injeção do Subject
-                       ConquistaService conquistaService) { // ADICIONADO: Injeção do Observer
+                       @Qualifier("streakBonus") PontuacaoStrategy pontuacaoStrategy, // MUDANÇA
+                       QuizCompletionSubject completionSubject,
+                       ConquistaService conquistaService) {
         this.quizRepository = quizRepository;
         this.progressoRepository = progressoRepository;
-        this.pontuacaoStrategy = pontuacaoStrategy;
+        this.pontuacaoStrategy = pontuacaoStrategy; // Agora é a estratégia final decorada
         this.completionSubject = completionSubject;
-
-        // ADICIONADO: Regista o ConquistaService como um observador
         this.completionSubject.addObserver(conquistaService);
     }
 
@@ -60,13 +63,13 @@ public class QuizService {
         progresso.setAcertos(resultadoDTO.getPontuacao());
         progresso.setTotalPerguntas(resultadoDTO.getTotalPerguntas());
         progresso.setConcluidoEm(LocalDateTime.now());
+
+        // A chamada aqui não muda, mas agora invoca a cadeia completa de decoradores
         int pontosGanhos = pontuacaoStrategy.calcularPontos(progresso);
         progresso.setPontosGanhos(pontosGanhos);
 
         progressoRepository.save(progresso);
-
-        // AQUI USAMOS O PADRÃO OBSERVER
-        // Notifica todos os observadores sobre a conclusão do quiz
+        
         completionSubject.notifyObservers(new QuizCompletionEvent(usuario, progresso));
     }
 
