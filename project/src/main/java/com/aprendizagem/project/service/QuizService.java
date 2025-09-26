@@ -27,19 +27,14 @@ public class QuizService {
     private final PontuacaoStrategy pontuacaoStrategy;
     private final QuizCompletionSubject completionSubject;
 
-    /**
-     * O construtor agora injeta o decorador final "streakBonus".
-     * O Spring irá automaticamente montar a cadeia:
-     * StreakBonusDecorator -> PontuacaoPorTempoStrategy -> PontuacaoSimplesStrategy
-     */
     public QuizService(QuizRepository quizRepository,
                        UsuarioQuizProgressoRepository progressoRepository,
-                       @Qualifier("streakBonus") PontuacaoStrategy pontuacaoStrategy, // MUDANÇA
+                       @Qualifier("streakBonus") PontuacaoStrategy pontuacaoStrategy,
                        QuizCompletionSubject completionSubject,
                        ConquistaService conquistaService) {
         this.quizRepository = quizRepository;
         this.progressoRepository = progressoRepository;
-        this.pontuacaoStrategy = pontuacaoStrategy; // Agora é a estratégia final decorada
+        this.pontuacaoStrategy = pontuacaoStrategy;
         this.completionSubject = completionSubject;
         this.completionSubject.addObserver(conquistaService);
     }
@@ -63,14 +58,29 @@ public class QuizService {
         progresso.setAcertos(resultadoDTO.getPontuacao());
         progresso.setTotalPerguntas(resultadoDTO.getTotalPerguntas());
         progresso.setConcluidoEm(LocalDateTime.now());
-
-        // A chamada aqui não muda, mas agora invoca a cadeia completa de decoradores
         int pontosGanhos = pontuacaoStrategy.calcularPontos(progresso);
         progresso.setPontosGanhos(pontosGanhos);
 
         progressoRepository.save(progresso);
         
         completionSubject.notifyObservers(new QuizCompletionEvent(usuario, progresso));
+    }
+
+    /**
+     * ADICIONADO: Lógica para reverter a submissão de um quiz.
+     * @param quizId O ID do quiz cujo progresso será revertido.
+     * @param usuario O utilizador para o qual a reversão será aplicada.
+     */
+    @Transactional
+    public void reverterResultadoQuiz(Long quizId, Usuario usuario) {
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new RuntimeException("Quiz não encontrado para reversão."));
+
+        // Encontra o progresso e apaga-o
+        progressoRepository.findByUsuarioAndQuiz(usuario, quiz)
+                .ifPresent(progresso -> progressoRepository.delete(progresso));
+
+        System.out.println(">>> Progresso do quiz " + quizId + " para o utilizador " + usuario.getNome() + " foi revertido.");
     }
 
     private QuizDataDTO mapToQuizDataDTO(Quiz quiz) {
