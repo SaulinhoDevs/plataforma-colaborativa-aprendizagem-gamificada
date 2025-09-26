@@ -18,5 +18,7 @@ public class DashboardDataDTO {
     private List<String> conquistas;
     private List<RankingItemDTO> ranking;
 
+    // ADICIONADO: Campo para identificar o tipo de utilizador no frontend
+    private boolean isProfessor = false;
 }
 

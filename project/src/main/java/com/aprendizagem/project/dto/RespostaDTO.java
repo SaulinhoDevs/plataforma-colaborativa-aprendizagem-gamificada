@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class RespostaDTO {
     private Long id;
-    private String texto;
-    private boolean correta;
+    private String text; // Corrigido de 'texto' para 'text'
+    private boolean correct; // Corrigido de 'correta' para 'correct'
 }
+

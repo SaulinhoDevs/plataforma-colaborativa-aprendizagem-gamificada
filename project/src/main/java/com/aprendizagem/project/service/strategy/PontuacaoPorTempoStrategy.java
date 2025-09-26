@@ -1,6 +1,7 @@
 package com.aprendizagem.project.service.strategy;
 
 import com.aprendizagem.project.model.UsuarioQuizProgresso;
+import org.springframework.beans.factory.annotation.Qualifier; // ADICIONADO
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -8,30 +9,26 @@ import java.time.LocalDateTime;
 
 /**
  * Implementação concreta do padrão Decorator.
- * Esta classe "decora" uma estratégia de pontuação existente, adicionando
- * um bónus de pontos se o quiz for concluído rapidamente.
  */
-@Component("pontuacaoPorTempo") // Nome do Bean para injeção de dependência
+@Component("pontuacaoPorTempo")
 public class PontuacaoPorTempoStrategy extends PontuacaoDecorator {
 
-    private static final long TEMPO_LIMITE_SEGUNDOS = 60; // Ex: 1 minuto por pergunta
-    private static final int BONUS_POR_RAPIDEZ = 5; // Ex: 5 pontos de bónus por pergunta
+    private static final long TEMPO_LIMITE_SEGUNDOS = 60;
+    private static final int BONUS_POR_RAPIDEZ = 5;
 
     /**
-     * O construtor recebe a estratégia de pontuação base que será decorada.
-     * O Spring irá injetar aqui a nossa "pontuacaoSimples".
+     * O construtor agora usa @Qualifier para dizer ao Spring exatamente qual bean
+     * deve ser injetado, resolvendo a ambiguidade.
      * @param wrapped A estratégia a ser decorada.
      */
-    public PontuacaoPorTempoStrategy(PontuacaoStrategy wrapped) {
+    public PontuacaoPorTempoStrategy(@Qualifier("pontuacaoSimples") PontuacaoStrategy wrapped) { // MUDANÇA
         super(wrapped);
     }
 
     @Override
     public int calcularPontos(UsuarioQuizProgresso progresso) {
-        // 1. Calcula a pontuação base chamando o método da estratégia embrulhada
         int pontuacaoBase = super.calcularPontos(progresso);
 
-        // 2. Adiciona a nova lógica de bónus
         long tempoGasto = calcularTempoGasto(progresso);
         long tempoLimite = progresso.getTotalPerguntas() * TEMPO_LIMITE_SEGUNDOS;
 
@@ -45,9 +42,9 @@ public class PontuacaoPorTempoStrategy extends PontuacaoDecorator {
     }
 
     private long calcularTempoGasto(UsuarioQuizProgresso progresso) {
-        // Para este exemplo, vamos simular o tempo de início.
-        // Numa implementação real, guardaríamos o 'iniciadoEm' no progresso.
-        LocalDateTime iniciadoEm = progresso.getConcluidoEm().minusSeconds(70); // Simulação
+        // Simulação do tempo de início
+        LocalDateTime iniciadoEm = progresso.getConcluidoEm().minusSeconds(70);
         return Duration.between(iniciadoEm, progresso.getConcluidoEm()).getSeconds();
     }
 }
+

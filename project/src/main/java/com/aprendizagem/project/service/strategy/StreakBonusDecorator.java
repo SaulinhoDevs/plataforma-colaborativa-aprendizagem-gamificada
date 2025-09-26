@@ -1,26 +1,23 @@
 package com.aprendizagem.project.service.strategy;
 
+import com.aprendizagem.project.model.Usuario;
 import com.aprendizagem.project.model.UsuarioQuizProgresso;
 import com.aprendizagem.project.repository.UsuarioQuizProgressoRepository;
+import org.springframework.beans.factory.annotation.Qualifier; // ADICIONADO: Importação que faltava
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * Segunda implementação concreta do padrão Decorator.
- * Esta classe "decora" uma estratégia de pontuação, adicionando um bónus
- * se o utilizador tiver completado um quiz no dia anterior (streak).
  */
-@Component("streakBonus") // Nome do Bean para injeção de dependência
+@Component("streakBonus")
 public class StreakBonusDecorator extends PontuacaoDecorator {
 
-    private static final int BONUS_POR_STREAK = 25; // Ex: 25 pontos extra por manter a sequência
+    private static final int BONUS_POR_STREAK = 25;
     private final UsuarioQuizProgressoRepository progressoRepository;
 
-    /**
-     * O construtor recebe a estratégia que será decorada (que, no nosso caso,
-     * será a "pontuacaoPorTempo") e o repositório necessário para verificar a streak.
-     */
     public StreakBonusDecorator(@Qualifier("pontuacaoPorTempo") PontuacaoStrategy wrapped,
                                 UsuarioQuizProgressoRepository progressoRepository) {
         super(wrapped);
@@ -29,10 +26,8 @@ public class StreakBonusDecorator extends PontuacaoDecorator {
 
     @Override
     public int calcularPontos(UsuarioQuizProgresso progresso) {
-        // 1. Calcula a pontuação base (que já pode incluir o bónus por tempo)
         int pontuacaoBase = super.calcularPontos(progresso);
 
-        // 2. Adiciona a nova lógica de bónus por streak
         if (temStreakAtiva(progresso.getUsuario())) {
             System.out.println(">>> Bónus por STREAK aplicado: " + BONUS_POR_STREAK + " pontos!");
             return pontuacaoBase + BONUS_POR_STREAK;
@@ -46,14 +41,14 @@ public class StreakBonusDecorator extends PontuacaoDecorator {
      * @param usuario O utilizador a ser verificado.
      * @return true se houver uma streak ativa, false caso contrário.
      */
-    private boolean temStreakAtiva(com.aprendizagem.project.model.Usuario usuario) {
-        // A data de ontem
+    private boolean temStreakAtiva(Usuario usuario) {
+        // CORREÇÃO: Lógica real para verificar a streak
         LocalDate ontem = LocalDate.now().minusDays(1);
-        
-        // No futuro, criaremos este método no nosso repositório
-        // return progressoRepository.existsByUsuarioAndDataConclusao(usuario, ontem);
-        
-        // Por agora, vamos simular que o utilizador tem uma streak
-        return true;
+        LocalDateTime inicioDeOntem = ontem.atStartOfDay();
+        LocalDateTime fimDeOntem = ontem.atTime(23, 59, 59);
+
+        // Este método precisa de ser adicionado ao repositório
+        return progressoRepository.existsByUsuarioAndConcluidoEmBetween(usuario, inicioDeOntem, fimDeOntem);
     }
 }
+

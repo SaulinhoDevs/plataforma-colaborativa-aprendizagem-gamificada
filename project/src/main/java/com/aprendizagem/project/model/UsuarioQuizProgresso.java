@@ -3,10 +3,15 @@ package com.aprendizagem.project.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Data
 @NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class UsuarioQuizProgresso {
 
     @Id
@@ -21,24 +26,18 @@ public class UsuarioQuizProgresso {
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
-    @Column(nullable = false)
-    private int pontuacao; // Quantas perguntas acertou
+    // ADICIONADO: Campos para guardar o progresso e a pontuação
+    private Integer acertos;
+    private Integer totalPerguntas;
+    private Integer pontosGanhos;
 
-    @Column(nullable = false)
-    private int totalPerguntas; // Total de perguntas no quiz no momento da submissão
+    @CreatedDate // Usaremos a data de criação como a data de conclusão
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime concluidoEm;
 
-    public UsuarioQuizProgresso(Usuario usuario, Quiz quiz, int pontuacao, int totalPerguntas) {
+    public UsuarioQuizProgresso(Usuario usuario, Quiz quiz) {
         this.usuario = usuario;
         this.quiz = quiz;
-        this.pontuacao = pontuacao;
-        this.totalPerguntas = totalPerguntas;
-    }
-
-    // Método de conveniência para calcular a percentagem de progresso
-    public int getProgressoPercentual() {
-        if (totalPerguntas == 0) {
-            return 0;
-        }
-        return (int) Math.round(((double) pontuacao / totalPerguntas) * 100);
     }
 }
+

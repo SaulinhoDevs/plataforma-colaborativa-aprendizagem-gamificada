@@ -6,6 +6,7 @@ import com.aprendizagem.project.model.UsuarioQuizProgresso;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,8 +16,9 @@ public interface UsuarioQuizProgressoRepository extends JpaRepository<UsuarioQui
 
     long countByUsuario(Usuario usuario);
 
-    // ADICIONADO: Método para buscar todos os progressos de um quiz específico.
-    // Este método é utilizado pela nossa RelatorioFacade.
     List<UsuarioQuizProgresso> findByQuizId(Long quizId);
+
+    // ADICIONADO: Método para verificar se um utilizador completou um quiz num intervalo de tempo
+    boolean existsByUsuarioAndConcluidoEmBetween(Usuario usuario, LocalDateTime inicio, LocalDateTime fim);
 }
 

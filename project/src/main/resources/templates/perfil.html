@@ -18,96 +18,71 @@
         <div class="container-fluid">
             <a class="navbar-brand dashboard-header" th:href="@{/dashboard}">Questify</a>
             <div class="d-flex align-items-center ms-auto">
-                <i class="bi bi-bell-fill fs-5 text-secondary me-3"></i>
-                <img th:src="${perfil.avatarUrl}" alt="Avatar do Utilizador" class="rounded-circle">
+                <a th:href="@{/dashboard}" class="back-link me-3"><i class="bi bi-arrow-left"></i> Voltar ao Dashboard</a>
             </div>
         </div>
     </nav>
 </header>
 
-<main class="container my-4">
+<main class="container-fluid my-5">
     <div class="row justify-content-center">
-        <div class="col-lg-10 col-xl-8">
-            <div class="d-flex align-items-center mb-4">
-                <a th:href="@{/dashboard}" class="btn btn-outline-secondary me-3"><i class="bi bi-arrow-left"></i></a>
-                <h1 class="h3 mb-0 fw-bold">Meu Perfil</h1>
-            </div>
+        <div class="col-lg-8 col-md-10">
 
             <!-- Card Principal do Perfil -->
-            <div class="card profile-card mb-4">
+            <div class="card profile-card">
                 <div class="card-body text-center">
-                    <img th:src="${perfil.avatarUrl}" alt="Avatar do Utilizador" class="profile-avatar mb-3">
-                    <h2 class="profile-name" th:text="${perfil.nome}">Nome do Aluno</h2>
-                    <p class="profile-level" th:text="|Nível ${perfil.nivel} - ${perfil.tituloNivel}|">Nível 5 - Mestre Curioso</p>
-                    
-                    <!-- Barra de XP -->
-                    <div class="xp-bar-container">
-                        <div class="progress" role="progressbar" th:attr="aria-valuenow=${perfil.xpPercentual}" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar" th:style="'width: ' + ${perfil.xpPercentual} + '%'"></div>
+                    <img th:src="${perfilData.avatarUrl}" alt="Avatar do Utilizador" class="profile-avatar mb-2">
+                    <h1 class="profile-name" th:text="${perfilData.nome}"></h1>
+                    <p class="text-muted" th:text="${perfilData.email}"></p>
+                    <div class="xp-bar-container px-lg-5">
+                        <div class="d-flex justify-content-between xp-label">
+                            <span th:text="'Nível ' + ${perfilData.nivel}"></span>
+                            <span>250 / 1000 XP</span>
                         </div>
-                        <small class="xp-label" th:text="|${perfil.xpAtual} / ${perfil.xpParaProximoNivel} XP para o próximo nível|">150 / 200 XP para o próximo nível</small>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Estatísticas -->
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <div class="card stat-card">
-                        <div class="card-body">
-                            <i class="bi bi-trophy-fill stat-icon"></i>
-                            <p class="stat-value" th:text="${perfil.pontosTotais}">1250</p>
-                            <p class="stat-label">Pontos Totais</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card stat-card">
-                        <div class="card-body">
-                            <i class="bi bi-check-circle-fill stat-icon"></i>
-                            <p class="stat-value" th:text="${perfil.quizzesConcluidos}">15</p>
-                            <p class="stat-label">Quizzes Concluídos</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card stat-card">
-                        <div class="card-body">
-                            <i class="bi bi-bullseye stat-icon"></i>
-                            <p class="stat-value" th:text="${perfil.precisao} + '%'">88%</p>
-                            <p class="stat-label">Precisão Média</p>
+                        <div class="progress" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar" style="width: 25%"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Galeria de Conquistas -->
-            <div class="card profile-section-card mb-4">
-                <div class="card-body">
-                    <h3 class="section-title">Galeria de Conquistas</h3>
-                    <div class="achievement-gallery">
-                        <div class="achievement-item" th:each="conquista : ${perfil.conquistas}" th:title="${conquista.nome}">
-                            <span class="achievement-icon" th:text="${conquista.icone}">🏅</span>
-                            <small th:text="${conquista.nome}"></small>
-                        </div>
+            <!-- Grid para as secções inferiores -->
+            <div class="profile-sections-grid">
+                <!-- Card de Estatísticas -->
+                <div class="card profile-section-card h-100">
+                    <div class="card-body">
+                        <h2 class="section-title">Minhas Estatísticas</h2>
+                        <ul class="list-group list-group-flush">
+                             <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <strong>Pontos Totais:</strong> <span class="badge bg-primary rounded-pill" th:text="${perfilData.pontosTotais}"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <strong>Quizzes Concluídos:</strong> <span class="badge bg-info rounded-pill" th:text="${perfilData.quizzesConcluidos}"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <strong>Precisão Média:</strong> <span class="badge bg-success rounded-pill" th:text="${perfilData.precisaoMedia} + '%'"></span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Gráfico de Desempenho (Estrutura) -->
-             <div class="card profile-section-card mb-4">
-                <div class="card-body">
-                    <h3 class="section-title">Desempenho por Categoria</h3>
-                    <canvas id="performanceChart"></canvas>
+                <!-- Card de Conquistas -->
+                <div class="card profile-section-card h-100">
+                    <div class="card-body">
+                        <h2 class="section-title">Minhas Conquistas</h2>
+                        <div class="achievement-gallery">
+                            <div class="achievement-item" th:each="icone : ${perfilData.conquistasIcones}">
+                                <span class="achievement-icon" th:text="${icone}"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
         </div>
     </div>
 </main>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script th:src="@{/js/perfil.js}"></script>
-
 </body>
 </html>
+

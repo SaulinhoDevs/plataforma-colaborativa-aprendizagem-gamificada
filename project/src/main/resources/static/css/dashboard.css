@@ -148,3 +148,46 @@ body {
     height: 0.5rem;
 }
 
+/* ... (estilos existentes) ... */
+
+/* ADICIONADO: Estilos para o Dashboard do Professor */
+.professor-card-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.professor-card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.professor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.professor-card-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.professor-card-icon i {
+    font-size: 1.75rem;
+}
+
+.bg-primary-soft {
+    background-color: #f5f3ff;
+}
+.bg-success-soft {
+    background-color: #f0fdf4;
+}
+.bg-warning-soft {
+    background-color: #fffbeb;
+}
