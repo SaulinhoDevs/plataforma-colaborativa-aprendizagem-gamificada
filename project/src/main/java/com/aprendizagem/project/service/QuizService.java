@@ -2,33 +2,72 @@ package com.aprendizagem.project.service;
 
 import com.aprendizagem.project.dto.PerguntaDTO;
 import com.aprendizagem.project.dto.QuizDataDTO;
+import com.aprendizagem.project.dto.QuizResultadoDTO;
 import com.aprendizagem.project.dto.RespostaDTO;
 import com.aprendizagem.project.model.Quiz;
+import com.aprendizagem.project.model.Usuario;
+import com.aprendizagem.project.model.UsuarioQuizProgresso;
 import com.aprendizagem.project.repository.QuizRepository;
+import com.aprendizagem.project.repository.UsuarioQuizProgressoRepository;
+import com.aprendizagem.project.service.observer.QuizCompletionEvent;
+import com.aprendizagem.project.service.observer.QuizCompletionSubject;
+import com.aprendizagem.project.service.strategy.PontuacaoStrategy;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 @Service
 public class QuizService {
 
     private final QuizRepository quizRepository;
+    private final UsuarioQuizProgressoRepository progressoRepository;
+    private final PontuacaoStrategy pontuacaoStrategy;
+    private final QuizCompletionSubject completionSubject; // ADICIONADO: O "Subject"
 
-    public QuizService(QuizRepository quizRepository) {
+    public QuizService(QuizRepository quizRepository,
+                       UsuarioQuizProgressoRepository progressoRepository,
+                       @Qualifier("pontuacaoSimples") PontuacaoStrategy pontuacaoStrategy,
+                       QuizCompletionSubject completionSubject, // ADICIONADO: Injeção do Subject
+                       ConquistaService conquistaService) { // ADICIONADO: Injeção do Observer
         this.quizRepository = quizRepository;
+        this.progressoRepository = progressoRepository;
+        this.pontuacaoStrategy = pontuacaoStrategy;
+        this.completionSubject = completionSubject;
+
+        // ADICIONADO: Regista o ConquistaService como um observador
+        this.completionSubject.addObserver(conquistaService);
     }
 
     @Transactional(readOnly = true)
     public QuizDataDTO findQuizById(Long id) {
-        // chama o método com EntityGraph para trazer perguntas+respostas em uma única query
-        Quiz quiz = quizRepository.findWithPerguntasRespostasById(id)
+        Quiz quiz = quizRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Quiz não encontrado com o id: " + id));
-
-        // opcional: forçar inicialização dentro da transação — geralmente não necessário com EntityGraph
-        quiz.getPerguntas().size();
-        quiz.getPerguntas().forEach(p -> p.getRespostas().size());
-
         return mapToQuizDataDTO(quiz);
+    }
+
+    @Transactional
+    public void processarResultadoQuiz(QuizResultadoDTO resultadoDTO, Usuario usuario) {
+        Quiz quiz = quizRepository.findById(resultadoDTO.getQuizId())
+                .orElseThrow(() -> new RuntimeException("Quiz não encontrado para submissão."));
+
+        UsuarioQuizProgresso progresso = progressoRepository
+                .findByUsuarioAndQuiz(usuario, quiz)
+                .orElse(new UsuarioQuizProgresso(usuario, quiz));
+
+        progresso.setAcertos(resultadoDTO.getPontuacao());
+        progresso.setTotalPerguntas(resultadoDTO.getTotalPerguntas());
+        progresso.setConcluidoEm(LocalDateTime.now());
+        int pontosGanhos = pontuacaoStrategy.calcularPontos(progresso);
+        progresso.setPontosGanhos(pontosGanhos);
+
+        progressoRepository.save(progresso);
+
+        // AQUI USAMOS O PADRÃO OBSERVER
+        // Notifica todos os observadores sobre a conclusão do quiz
+        completionSubject.notifyObservers(new QuizCompletionEvent(usuario, progresso));
     }
 
     private QuizDataDTO mapToQuizDataDTO(Quiz quiz) {
@@ -36,24 +75,19 @@ public class QuizService {
         dto.setId(quiz.getId());
         dto.setTitulo(quiz.getTitulo());
         dto.setCategoria(quiz.getCategoria());
-
-        // CORREÇÃO: A usar os nomes de DTO e setters em português para corresponder ao JS
         dto.setPerguntas(quiz.getPerguntas().stream().map(pergunta -> {
             PerguntaDTO perguntaDTO = new PerguntaDTO();
             perguntaDTO.setId(pergunta.getId());
-            perguntaDTO.setTexto(pergunta.getTexto()); // Corrigido para setTexto
-
-            perguntaDTO.setRespostas(pergunta.getRespostas().stream().map(resposta -> { // Corrigido para setRespostas
+            perguntaDTO.setText(pergunta.getTexto());
+            perguntaDTO.setAnswers(pergunta.getRespostas().stream().map(resposta -> {
                 RespostaDTO respostaDTO = new RespostaDTO();
                 respostaDTO.setId(resposta.getId());
-                respostaDTO.setTexto(resposta.getTexto()); // Corrigido para setTexto
-                respostaDTO.setCorreta(resposta.isCorreta()); // Corrigido para setCorreta
+                respostaDTO.setText(resposta.getTexto());
+                respostaDTO.setCorrect(resposta.isCorreta());
                 return respostaDTO;
             }).collect(Collectors.toList()));
-
             return perguntaDTO;
         }).collect(Collectors.toList()));
-
         return dto;
     }
 }
