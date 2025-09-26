@@ -2,11 +2,11 @@ package com.aprendizagem.project.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -15,6 +15,8 @@ import java.util.Set;
 @Entity
 @Data
 @NoArgsConstructor
+@ToString(exclude = "perguntas") // Evita recursão no toString
+@EqualsAndHashCode(exclude = "perguntas") // Evita recursão no equals/hashCode
 @EntityListeners(AuditingEntityListener.class)
 public class Quiz {
 
@@ -30,9 +32,7 @@ public class Quiz {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // Evita "bag" e reduz N+1 quando usar JOIN FETCH
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @Fetch(FetchMode.SUBSELECT)
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<Pergunta> perguntas = new HashSet<>();
 
     public Quiz(String titulo, String descricao, String categoria) {
@@ -41,13 +41,14 @@ public class Quiz {
         this.categoria = categoria;
     }
 
-    // Método auxiliar atualizado para trabalhar com Set
-    public void setPerguntas(Set<Pergunta> perguntas) {
-        this.perguntas.clear();
-        if (perguntas != null) {
-            this.perguntas.addAll(perguntas);
-            perguntas.forEach(pergunta -> pergunta.setQuiz(this));
-        }
+    /**
+     * ATUALIZADO: Método auxiliar robusto para adicionar uma pergunta.
+     * Isto garante que o relacionamento bidirecional seja sempre consistente.
+     * @param pergunta A pergunta a ser adicionada.
+     */
+    public void addPergunta(Pergunta pergunta) {
+        this.perguntas.add(pergunta);
+        pergunta.setQuiz(this);
     }
 }
 

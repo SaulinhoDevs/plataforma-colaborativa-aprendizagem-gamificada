@@ -6,9 +6,9 @@ import lombok.*;
 @Entity
 @Getter
 @Setter
-@ToString
-@EqualsAndHashCode(exclude = "pergunta") // MUDANÇA CRÍTICA: Exclui o campo "pergunta" para quebrar o ciclo
 @NoArgsConstructor
+@ToString(exclude = "pergunta") // Evita recursão no toString
+@EqualsAndHashCode(exclude = "pergunta") // Evita recursão e foca no ID para a identidade
 public class Resposta {
 
     @Id
@@ -22,7 +22,7 @@ public class Resposta {
     private boolean correta;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pergunta_id")
+    @JoinColumn(name = "pergunta_id", nullable = false)
     private Pergunta pergunta;
 
     public Resposta(String texto, boolean correta) {

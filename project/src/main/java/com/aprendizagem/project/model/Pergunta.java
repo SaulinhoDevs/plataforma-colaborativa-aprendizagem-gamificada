@@ -2,8 +2,6 @@ package com.aprendizagem.project.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,9 +9,9 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@ToString
-@EqualsAndHashCode(exclude = "quiz") // MUDANÇA CRÍTICA: Exclui o campo "quiz" para quebrar o ciclo
 @NoArgsConstructor
+@ToString(exclude = {"quiz", "respostas"}) // Evita recursão no toString
+@EqualsAndHashCode(exclude = {"quiz", "respostas"}) // Evita recursão e foca no ID para a identidade
 public class Pergunta {
 
     @Id
@@ -24,25 +22,24 @@ public class Pergunta {
     private String texto;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "quiz_id")
+    @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
-    // antes: List<Resposta> respostas;
-    // Use Set + SUBSELECT para evitar selects por cada pergunta após JOIN FETCH
-    @OneToMany(mappedBy = "pergunta", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @Fetch(FetchMode.SUBSELECT)
+    @OneToMany(mappedBy = "pergunta", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<Resposta> respostas = new HashSet<>();
 
     public Pergunta(String texto) {
         this.texto = texto;
     }
 
-    public void setRespostas(Set<Resposta> respostas) {
-        this.respostas.clear();
-        if (respostas != null) {
-            this.respostas.addAll(respostas);
-            respostas.forEach(resposta -> resposta.setPergunta(this));
-        }
+    /**
+     * ATUALIZADO: Método auxiliar robusto para adicionar uma resposta.
+     * Isto garante que o relacionamento bidirecional seja sempre consistente.
+     * @param resposta A resposta a ser adicionada.
+     */
+    public void addResposta(Resposta resposta) {
+        this.respostas.add(resposta);
+        resposta.setPergunta(this);
     }
 }
 
