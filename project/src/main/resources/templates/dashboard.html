@@ -97,11 +97,18 @@
         <div th:unless="${dashboardData.isProfessor()}">
              <div class="row">
                 <div class="col-lg-8">
+                    <!-- SEÇÃO CORRIGIDA: Desafio do Dia agora funcional -->
                     <section class="dashboard-card challenge-card">
                         <i class="bi bi-stars icon"></i>
                         <h2 class="h5 fw-bold">🔥 Desafio do Dia</h2>
                         <p class="mb-3">Teste os seus conhecimentos e ganhe o dobro de pontos!</p>
-                        <button class="btn btn-light fw-bold">Começar Desafio</button>
+                        <!-- CORRIGIDO: Link funcional para um quiz -->
+                        <a th:href="${not #lists.isEmpty(dashboardData.novosQuizzes) ? '/quiz/' + dashboardData.novosQuizzes[0].id : '#'}" 
+                           class="btn btn-light fw-bold"
+                           th:classappend="${#lists.isEmpty(dashboardData.novosQuizzes) ? 'disabled' : ''}">
+                            <span th:if="${not #lists.isEmpty(dashboardData.novosQuizzes)}">Começar Desafio</span>
+                            <span th:unless="${not #lists.isEmpty(dashboardData.novosQuizzes)}">Nenhum quiz disponível</span>
+                        </a>
                     </section>
                     
                     <!-- SEÇÃO CORRIGIDA: Continue Sua Jornada -->
