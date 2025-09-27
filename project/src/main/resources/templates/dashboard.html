@@ -19,8 +19,16 @@
         <div class="container-fluid">
             <a class="navbar-brand dashboard-header" th:href="@{/dashboard}">Questify</a>
             <div class="d-flex align-items-center ms-auto">
+                <!-- ADICIONADO: Link para o mural -->
+                <a th:href="@{/mural}" class="nav-link me-3" title="Mural Coletivo">
+                    <i class="bi bi-chat-square-dots-fill fs-5 text-secondary"></i>
+                </a>
                 <i class="bi bi-bell-fill fs-5 text-secondary me-3"></i>
-                <!-- ATUALIZADO: O ícone de perfil agora é um link -->
+                <!-- ADICIONADO: Botão de logout -->
+                <a th:href="@{/login}" class="btn btn-outline-secondary btn-sm me-3" title="Sair da aplicação">
+                    <i class="bi bi-box-arrow-right"></i> Sair
+                </a>
+                <!-- Link para perfil -->
                 <a th:href="@{/perfil}">
                     <img th:src="${dashboardData.usuario.avatarUrl}" alt="Avatar do Utilizador" class="rounded-circle">
                 </a>
