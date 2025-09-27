@@ -1,0 +1,204 @@
+classDiagram
+    %% Padrão Singleton
+    class AppConfig {
+        -AppConfig instance$
+        -String platformName
+        -String platformVersion
+        -AppConfig()
+        +getInstance()$ AppConfig
+        +getPlatformName() String
+        +getPlatformVersion() String
+    }
+
+    %% Padrão Factory Method
+    class UsuarioFactory {
+        +createUsuario(CadastroRequest, String)$ Usuario
+        +createUsuario(String, String, String, TipoUsuario)$ Usuario
+    }
+
+    %% Hierarquia de Usuários
+    class Usuario {
+        <<abstract>>
+        #Long id
+        #String nome
+        #String email
+        #String password
+        #TipoUsuario tipo
+        #LocalDateTime createdAt
+        #LocalDateTime updatedAt
+    }
+
+    class Aluno {
+        -int nivel
+    }
+
+    class Professor {
+        -String disciplina
+    }
+
+    class Visitante {
+        -boolean convidadoEspecial
+    }
+
+    %% Padrão Strategy
+    class PontuacaoStrategy {
+        <<interface>>
+        +calcularPontos(UsuarioQuizProgresso) int
+    }
+
+    class PontuacaoSimplesStrategy {
+        -int PONTOS_POR_ACERTO$
+        +calcularPontos(UsuarioQuizProgresso) int
+    }
+
+    %% Padrão Decorator
+    class PontuacaoDecorator {
+        <<abstract>>
+        #PontuacaoStrategy wrapped
+        +PontuacaoDecorator(PontuacaoStrategy)
+        +calcularPontos(UsuarioQuizProgresso) int
+    }
+
+    class PontuacaoPorTempoStrategy {
+        -long TEMPO_LIMITE_SEGUNDOS$
+        -int BONUS_POR_RAPIDEZ$
+        +calcularPontos(UsuarioQuizProgresso) int
+    }
+
+    class StreakBonusDecorator {
+        -int BONUS_POR_STREAK$
+        -UsuarioQuizProgressoRepository progressoRepository
+        +calcularPontos(UsuarioQuizProgresso) int
+        -temStreakAtiva(Usuario) boolean
+    }
+
+    %% Padrão Observer
+    class QuizCompletionSubject {
+        -List~QuizCompletionObserver~ observers
+        +addObserver(QuizCompletionObserver) void
+        +removeObserver(QuizCompletionObserver) void
+        +notifyObservers(QuizCompletionEvent) void
+    }
+
+    class QuizCompletionObserver {
+        <<interface>>
+        +update(QuizCompletionEvent) void
+    }
+
+    class ConquistaService {
+        -ConquistaRepository conquistaRepository
+        -UsuarioConquistaRepository usuarioConquistaRepository
+        -UsuarioQuizProgressoRepository progressoRepository
+        +update(QuizCompletionEvent) void
+        -verificarConquistas(Usuario) void
+        -atribuirConquista(Usuario, Conquista) void
+    }
+
+    class QuizCompletionEvent {
+        -Usuario usuario
+        -UsuarioQuizProgresso progresso
+        +getUsuario() Usuario
+        +getProgresso() UsuarioQuizProgresso
+    }
+
+    %% Padrão Command
+    class Command {
+        <<interface>>
+        +execute() void
+        +undo() void
+    }
+
+    class SubmitQuizCommand {
+        -QuizService quizService
+        -QuizResultadoDTO resultadoDTO
+        -Usuario usuario
+        +execute() void
+        +undo() void
+    }
+
+    class CommandInvoker {
+        -Deque~Command~ commandHistory
+        +executeCommand(Command) void
+        +undoLastCommand() void
+    }
+
+    %% Padrão Composite
+    class Conquista {
+        <<abstract>>
+        #Long id
+        #String nome
+        #String descricao
+        #String icone
+        +adicionar(Conquista) void
+        +remover(Conquista) void
+    }
+
+    class ConquistaSimples {
+    }
+
+    class GrupoDeConquistas {
+        -Set~Conquista~ componentes
+        +adicionar(Conquista) void
+        +remover(Conquista) void
+    }
+
+    %% Padrão Adapter
+    class ExternalRankingAdapter {
+        -ExternalRankingClient externalClient
+        +getAdaptedRanking() List~RankingItemDTO~
+        -adapt(ExternalRankingEntryDTO) RankingItemDTO
+    }
+
+    class ExternalRankingClient {
+        +getGlobalRanking() List~ExternalRankingEntryDTO~
+    }
+
+    %% Padrão Facade
+    class RelatorioFacade {
+        <<interface>>
+        +gerarRelatorio(Long, String) byte[]
+    }
+
+    class RelatorioFacadeImpl {
+        -GeradorRelatorioCsv geradorCsv
+        -GeradorRelatorioPdf geradorPdf
+        -UsuarioQuizProgressoRepository progressoRepository
+        +gerarRelatorio(Long, String) byte[]
+    }
+
+    class GeradorRelatorioCsv {
+        +gerar(List~UsuarioQuizProgresso~) byte[]
+    }
+
+    class GeradorRelatorioPdf {
+        +gerar(List~UsuarioQuizProgresso~) byte[]
+    }
+
+    %% Relacionamentos dos Padrões
+    UsuarioFactory --> Usuario : creates
+    Usuario <|-- Aluno
+    Usuario <|-- Professor
+    Usuario <|-- Visitante
+
+    PontuacaoStrategy <|.. PontuacaoSimplesStrategy
+    PontuacaoStrategy <|.. PontuacaoDecorator
+    PontuacaoDecorator <|-- PontuacaoPorTempoStrategy
+    PontuacaoDecorator <|-- StreakBonusDecorator
+    PontuacaoDecorator --> PontuacaoStrategy : wraps
+
+    QuizCompletionSubject --> QuizCompletionObserver : notifies
+    QuizCompletionObserver <|.. ConquistaService
+    QuizCompletionSubject --> QuizCompletionEvent : creates
+
+    Command <|.. SubmitQuizCommand
+    CommandInvoker --> Command : manages
+
+    Conquista <|-- ConquistaSimples
+    Conquista <|-- GrupoDeConquistas
+    GrupoDeConquistas --> Conquista : contains
+
+    ExternalRankingAdapter --> ExternalRankingClient : uses
+
+    RelatorioFacade <|.. RelatorioFacadeImpl
+    RelatorioFacadeImpl --> GeradorRelatorioCsv
+    RelatorioFacadeImpl --> GeradorRelatorioPdf

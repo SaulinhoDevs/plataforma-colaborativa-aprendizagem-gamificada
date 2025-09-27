@@ -1,0 +1,75 @@
+sequenceDiagram
+    participant A as Aluno (Browser)
+    participant QC as QuizController
+    participant CI as CommandInvoker
+    participant SQC as SubmitQuizCommand
+    participant QS as QuizService
+    participant PS as PontuacaoStrategy
+    participant QCS as QuizCompletionSubject
+    participant CS as ConquistaService
+    participant UR as UsuarioRepository
+    participant PR as UsuarioQuizProgressoRepository
+    participant CR as ConquistaRepository
+
+    Note over A, CR: Fluxo: Aluno submete resultado do quiz
+
+    A->>+QC: POST /quiz/submit (QuizResultadoDTO)
+    QC->>+UR: findByEmail(principal.getName())
+    UR-->>-QC: Usuario
+
+    Note over QC, SQC: Padrão Command - Encapsulamento da operação
+
+    QC->>+SQC: new SubmitQuizCommand(quizService, resultadoDTO, usuario)
+    SQC-->>-QC: command
+
+    QC->>+CI: executeCommand(command)
+    CI->>+SQC: execute()
+
+    Note over SQC, QS: Execução do comando
+
+    SQC->>+QS: processarResultadoQuiz(resultadoDTO, usuario)
+    QS->>+PR: findByUsuarioAndQuiz(usuario, quiz)
+    PR-->>-QS: Optional<UsuarioQuizProgresso>
+
+    Note over QS, PS: Padrão Strategy/Decorator - Cálculo de pontuação
+
+    QS->>+PS: calcularPontos(progresso)
+    
+    Note over PS: Strategy pode ser:<br/>PontuacaoSimplesStrategy<br/>+ PontuacaoPorTempoStrategy (Decorator)<br/>+ StreakBonusDecorator (Decorator)
+    
+    PS-->>-QS: pontosCalculados
+
+    QS->>QS: progresso.setPontosGanhos(pontosCalculados)
+    QS->>+PR: save(progresso)
+    PR-->>-QS: UsuarioQuizProgresso salvo
+
+    Note over QS, QCS: Padrão Observer - Notificação de evento
+
+    QS->>+QCS: notifyObservers(new QuizCompletionEvent(usuario, progresso))
+    QCS->>+CS: update(QuizCompletionEvent)
+
+    Note over CS: Verifica se usuário merece novas conquistas
+
+    CS->>+PR: countByUsuario(usuario)
+    PR-->>-CS: quantidadeQuizzesConcluidos
+
+    alt Primeira vez completando quiz
+        CS->>+CR: findByNome("Iniciante Curioso")
+        CR-->>-CS: Optional<Conquista>
+        CS->>CS: atribuirConquista(usuario, conquista)
+        Note over CS: Nova conquista desbloqueada!
+    end
+
+    CS-->>-QCS: void
+    QCS-->>-QS: void
+    QS-->>-SQC: void
+
+    Note over CI, SQC: Comando armazenado para possível undo
+
+    SQC-->>-CI: void
+    CI->>CI: commandHistory.push(command)
+    CI-->>-QC: void
+
+    QC-->>-A: 200 OK
+
+    Note over A: Frontend pode mostrar:<br/>- Pontuação calculada<br/>- Conquistas desbloqueadas<br/>- Atualização de ranking
