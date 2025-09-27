@@ -1,63 +1,193 @@
-<!-- SEÇÃO CORRIGIDA: Continue Sua Jornada -->
-<section th:if="${not #lists.isEmpty(dashboardData.quizzesEmProgresso)}">
-    <h3 class="section-title">Continue Sua Jornada</h3>
-    <div class="scroll-container">
-        <a th:each="quiz : ${dashboardData.quizzesEmProgresso}" th:href="@{/quiz/{id}(id=${quiz.id})}" class="quiz-card-link">
-            <div class="dashboard-card quiz-card">
-                <h4 class="quiz-card-title" th:text="${quiz.titulo}"></h4>
-                <p class="small text-secondary mb-2" th:text="${quiz.categoria}"></p>
-                <!-- CORRIGIDO: Usa método getCorProgresso() do DTO -->
-                <div class="progress" role="progressbar" th:attr="aria-valuenow=${quiz.progresso}" aria-valuemin="0" aria-valuemax="100">
-                    <div class="progress-bar" th:classappend="${quiz.corProgresso}" th:style="'width: ' + ${quiz.progresso} + '%'"></div>
-                </div>
-                <!-- CORRIGIDO: Usa método getTextoProgresso() do DTO -->
-                <span class="small text-secondary mt-1 d-block" th:text="${quiz.textoProgresso}"></span>
-            </div>
-        </a>
-    </div>
-</section>
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
-<!-- SEÇÃO CORRIGIDA: Novos Desafios Para Você -->
-<section th:if="${not #lists.isEmpty(dashboardData.novosQuizzes)}">
-    <h3 class="section-title">Novos Desafios Para Você</h3>
-    <div class="scroll-container">
-        <a th:each="quiz : ${dashboardData.novosQuizzes}" th:href="@{/quiz/{id}(id=${quiz.id})}" class="quiz-card-link">
-            <div class="dashboard-card quiz-card">
-                <h4 class="quiz-card-title" th:text="${quiz.titulo}"></h4>
-                <p class="small text-secondary mb-2" th:text="${quiz.categoria}"></p>
-                <!-- ADICIONADO: Mostra tempo estimado para quizzes novos -->
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="badge bg-light text-dark" th:if="${quiz.tempoEstimado}" th:text="${quiz.tempoEstimado}">~5 min</span>
-                    <span class="badge" th:classappend="${quiz.status.name() == 'NOVO' ? 'bg-primary' : (quiz.status.name() == 'EM_PROGRESSO' ? 'bg-warning' : 'bg-success')}" 
-                          th:text="${quiz.status.descricao}">Novo</span>
-                </div>
-                <div class="mt-auto pt-2">
-                    <!-- CORRIGIDO: Texto dinâmico baseado no status -->
-                    <span class="btn btn-outline-primary btn-sm" th:text="${quiz.isNovo() ? 'Iniciar Quiz' : quiz.textoProgresso}">Iniciar Quiz</span>
-                </div>
-            </div>
-        </a>
-    </div>
-</section>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Questify</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
 
-<!-- SEÇÃO ADICIONAL: Quizzes Concluídos (nova funcionalidade) -->
-<section th:if="${not #lists.isEmpty(dashboardData.quizzesEmProgresso)} and ${dashboardData.quizzesConcluidos > 0}">
-    <h3 class="section-title">Quizzes Concluídos Recentemente</h3>
-    <div class="scroll-container">
-        <div th:each="quiz : ${dashboardData.quizzesEmProgresso}" th:if="${quiz.isConcluido()}" class="dashboard-card quiz-card completed-quiz">
-            <h4 class="quiz-card-title" th:text="${quiz.titulo}"></h4>
-            <p class="small text-secondary mb-2" th:text="${quiz.categoria}"></p>
-            <!-- Barra de progresso para quizzes concluídos -->
-            <div class="progress" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                <div class="progress-bar bg-success" style="width: 100%"></div>
+<body>
+<header class="bg-white shadow-sm sticky-top">
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand dashboard-header" th:href="@{/dashboard}">Questify</a>
+            <div class="d-flex align-items-center ms-auto">
+                <i class="bi bi-bell-fill fs-5 text-secondary me-3"></i>
+                <!-- ATUALIZADO: O ícone de perfil agora é um link -->
+                <a th:href="@{/perfil}">
+                    <img th:src="${dashboardData.usuario.avatarUrl}" alt="Avatar do Utilizador" class="rounded-circle">
+                </a>
             </div>
-            <div class="d-flex justify-content-between align-items-center mt-2">
-                <span class="small text-success fw-bold" th:text="${quiz.textoProgresso}">Concluído</span>
-                <span class="badge bg-success">
-                    <i class="bi bi-check-circle-fill me-1"></i>
-                    <span th:text="${quiz.pontuacaoObtida} + ' pts'">100 pts</span>
-                </span>
+        </div>
+    </nav>
+</header>
+
+<main class="container-fluid main-content">
+    <div class="px-lg-4">
+        <h1 class="h4 fw-bold mb-4" th:text="'Bem-vindo de volta, ' + ${dashboardData.usuario.nome} + '! 👋'"></h1>
+
+        <!-- ==================================================== -->
+        <!-- == CONTEÚDO EXIBIDO APENAS PARA O PROFESSOR == -->
+        <!-- ==================================================== -->
+        <div th:if="${dashboardData.isProfessor()}">
+            <div class="row">
+                <!-- Card de Gestão de Quizzes -->
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <a th:href="@{/gestao-quizzes}" class="professor-card-link">
+                        <div class="card professor-card">
+                            <div class="card-body text-center">
+                                <div class="professor-card-icon bg-primary-soft">
+                                    <i class="bi bi-gear-fill text-primary"></i>
+                                </div>
+                                <h2 class="h5 mt-3">Gerir Quizzes</h2>
+                                <p class="small text-muted">Edite, apague e veja os relatórios dos seus quizzes.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <!-- Card de Criação de Quiz -->
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <a th:href="@{/criar-quiz}" class="professor-card-link">
+                        <div class="card professor-card">
+                            <div class="card-body text-center">
+                                <div class="professor-card-icon bg-success-soft">
+                                    <i class="bi bi-plus-circle-fill text-success"></i>
+                                </div>
+                                <h2 class="h5 mt-3">Criar Novo Quiz</h2>
+                                <p class="small text-muted">Crie novos desafios para os seus alunos.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <!-- Card do Mural Coletivo -->
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <a th:href="@{/mural}" class="professor-card-link">
+                        <div class="card professor-card">
+                            <div class="card-body text-center">
+                                <div class="professor-card-icon bg-warning-soft">
+                                    <i class="bi bi-chat-left-text-fill text-warning"></i>
+                                </div>
+                                <h2 class="h5 mt-3">Mural Coletivo</h2>
+                                <p class="small text-muted">Interaja com a comunidade e responda a dúvidas.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- == CONTEÚDO EXIBIDO APENAS PARA O ALUNO == -->
+        <!-- ==================================================== -->
+        <div th:unless="${dashboardData.isProfessor()}">
+             <div class="row">
+                <div class="col-lg-8">
+                    <section class="dashboard-card challenge-card">
+                        <i class="bi bi-stars icon"></i>
+                        <h2 class="h5 fw-bold">🔥 Desafio do Dia</h2>
+                        <p class="mb-3">Teste os seus conhecimentos e ganhe o dobro de pontos!</p>
+                        <button class="btn btn-light fw-bold">Começar Desafio</button>
+                    </section>
+                    
+                    <!-- SEÇÃO CORRIGIDA: Continue Sua Jornada -->
+                    <section th:if="${not #lists.isEmpty(dashboardData.quizzesEmProgresso)}">
+                        <h3 class="section-title">Continue Sua Jornada</h3>
+                        <div class="scroll-container">
+                            <a th:each="quiz : ${dashboardData.quizzesEmProgresso}" th:href="@{/quiz/{id}(id=${quiz.id})}" class="quiz-card-link">
+                                <div class="dashboard-card quiz-card">
+                                    <h4 class="quiz-card-title" th:text="${quiz.titulo}"></h4>
+                                    <p class="small text-secondary mb-2" th:text="${quiz.categoria}"></p>
+                                    <!-- CORRIGIDO: Usa métodos do QuizResumoDTO -->
+                                    <div class="progress" role="progressbar" th:attr="aria-valuenow=${quiz.progresso}" aria-valuemin="0" aria-valuemax="100">
+                                        <div class="progress-bar" th:classappend="${quiz.corProgresso}" th:style="'width: ' + ${quiz.progresso} + '%'"></div>
+                                    </div>
+                                    <span class="small text-secondary mt-1 d-block" th:text="${quiz.textoProgresso}"></span>
+                                </div>
+                            </a>
+                        </div>
+                    </section>
+                    
+                    <!-- SEÇÃO CORRIGIDA: Novos Desafios Para Você -->
+                    <section th:if="${not #lists.isEmpty(dashboardData.novosQuizzes)}">
+                        <h3 class="section-title">Novos Desafios Para Você</h3>
+                        <div class="scroll-container">
+                            <a th:each="quiz : ${dashboardData.novosQuizzes}" th:href="@{/quiz/{id}(id=${quiz.id})}" class="quiz-card-link">
+                                <div class="dashboard-card quiz-card">
+                                    <h4 class="quiz-card-title" th:text="${quiz.titulo}"></h4>
+                                    <p class="small text-secondary mb-2" th:text="${quiz.categoria}"></p>
+                                    
+                                    <!-- NOVO: Badges informativos -->
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge bg-light text-dark" th:if="${quiz.tempoEstimado}" th:text="${quiz.tempoEstimado}">~5 min</span>
+                                        <span class="badge" 
+                                              th:classappend="${quiz.status.name() == 'NOVO' ? 'bg-primary' : (quiz.status.name() == 'EM_PROGRESSO' ? 'bg-warning' : 'bg-success')}" 
+                                              th:text="${quiz.status.descricao}">Novo</span>
+                                    </div>
+                                    
+                                    <div class="mt-auto pt-2">
+                                        <!-- CORRIGIDO: Botão com texto dinâmico -->
+                                        <span class="btn btn-outline-primary btn-sm" th:text="${quiz.textoProgresso}">Iniciar Quiz</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </section>
+                </div>
+                <div class="col-lg-4">
+                    <div class="dashboard-card">
+                        <h3 class="section-title">Resumo do Progresso</h3>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-trophy-fill widget-icon me-3"></i>
+                            <div>
+                                <div class="fw-bold" th:text="${dashboardData.pontosTotais} + ' Pontos'"></div>
+                                <div class="small text-secondary">Nível 5 - Mestre Curioso</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-check-circle-fill widget-icon me-3"></i>
+                            <div>
+                                <div class="fw-bold" th:text="${dashboardData.quizzesConcluidos} + ' Quizzes Concluídos'"></div>
+                                <div class="small text-secondary">Continue assim!</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-bullseye widget-icon me-3"></i>
+                            <div>
+                                <div class="fw-bold" th:text="${dashboardData.precisao} + '% de Precisão'"></div>
+                                <div class="small text-secondary">Média geral</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3 class="section-title">Suas Conquistas</h3>
+                        <div class="d-flex justify-content-start gap-3">
+                            <span class="fs-2" th:each="conquista : ${dashboardData.conquistas}" th:text="${conquista}"></span>
+                        </div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3 class="section-title">Ranking Semanal</h3>
+                        <ul class="list-unstyled ranking-list">
+                            <li class="d-flex align-items-center mb-2 p-2 rounded"
+                                th:each="item : ${dashboardData.ranking}"
+                                th:classappend="${item.isUsuarioAtual() ? 'current-user' : ''}">
+                                <span class="rank me-3" th:text="${item.posicao} + '.'"></span>
+                                <img th:src="${item.avatarUrl}" class="user-avatar rounded-circle me-3">
+                                <span class="fw-bold" th:text="${item.isUsuarioAtual() ? 'Você' : item.nome}"></span>
+                                <span class="ms-auto text-secondary" th:text="${item.pontos} + ' pts'"></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</section>
+</main>
+</body>
+</html>

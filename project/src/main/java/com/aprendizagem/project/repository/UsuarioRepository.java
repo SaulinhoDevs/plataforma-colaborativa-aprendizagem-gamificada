@@ -79,14 +79,14 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     /**
      * Busca posição do usuário no ranking geral
+     * CORRIGIDO: Query simplificada que funciona com HQL
      */
-    @Query("SELECT COUNT(u2) + 1 FROM " +
-           "(SELECT u, COALESCE(SUM(p.pontosGanhos), 0) as totalPontos " +
-           "FROM Usuario u LEFT JOIN UsuarioQuizProgresso p ON u = p.usuario " +
-           "GROUP BY u) as ranking(u, totalPontos), " +
-           "(SELECT COALESCE(SUM(p2.pontosGanhos), 0) as userPontos " +
-           "FROM Usuario u2 LEFT JOIN UsuarioQuizProgresso p2 ON u2 = p2.usuario " +
-           "WHERE u2.email = :email) as userRanking(userPontos) " +
-           "WHERE ranking.totalPontos > userRanking.userPontos")
+    @Query("SELECT COUNT(u) + 1 FROM Usuario u " +
+           "LEFT JOIN UsuarioQuizProgresso p ON u = p.usuario " +
+           "WHERE COALESCE(SUM(p.pontosGanhos), 0) > " +
+           "(SELECT COALESCE(SUM(p2.pontosGanhos), 0) " +
+           "FROM UsuarioQuizProgresso p2 " +
+           "WHERE p2.usuario.email = :email) " +
+           "GROUP BY u")
     Integer findPosicaoNoRanking(@Param("email") String email);
 }
