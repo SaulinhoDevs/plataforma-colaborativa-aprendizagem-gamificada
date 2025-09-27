@@ -41,7 +41,8 @@ public class QuizService {
 
     @Transactional(readOnly = true)
     public QuizDataDTO findQuizById(Long id) {
-        Quiz quiz = quizRepository.findById(id)
+        // CORREÇÃO: Usa método com EntityGraph para evitar Lazy Loading
+        Quiz quiz = quizRepository.findWithPerguntasRespostasById(id)
                 .orElseThrow(() -> new RuntimeException("Quiz não encontrado com o id: " + id));
         return mapToQuizDataDTO(quiz);
     }
@@ -83,6 +84,10 @@ public class QuizService {
         System.out.println(">>> Progresso do quiz " + quizId + " para o utilizador " + usuario.getNome() + " foi revertido.");
     }
 
+    /**
+     * CORRIGIDO: Mapeamento agora alinha nomes do Model com DTO
+     * Model usa: texto/correta, DTO usa: text/correct
+     */
     private QuizDataDTO mapToQuizDataDTO(Quiz quiz) {
         QuizDataDTO dto = new QuizDataDTO();
         dto.setId(quiz.getId());
@@ -91,11 +96,14 @@ public class QuizService {
         dto.setPerguntas(quiz.getPerguntas().stream().map(pergunta -> {
             PerguntaDTO perguntaDTO = new PerguntaDTO();
             perguntaDTO.setId(pergunta.getId());
+            // CORREÇÃO: Model.getTexto() -> DTO.setText()
             perguntaDTO.setText(pergunta.getTexto());
             perguntaDTO.setAnswers(pergunta.getRespostas().stream().map(resposta -> {
                 RespostaDTO respostaDTO = new RespostaDTO();
                 respostaDTO.setId(resposta.getId());
+                // CORREÇÃO: Model.getTexto() -> DTO.setText()
                 respostaDTO.setText(resposta.getTexto());
+                // CORREÇÃO: Model.isCorreta() -> DTO.setCorrect()
                 respostaDTO.setCorrect(resposta.isCorreta());
                 return respostaDTO;
             }).collect(Collectors.toList()));
@@ -104,4 +112,3 @@ public class QuizService {
         return dto;
     }
 }
-

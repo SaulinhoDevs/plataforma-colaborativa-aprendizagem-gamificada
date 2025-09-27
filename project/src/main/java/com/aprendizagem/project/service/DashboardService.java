@@ -134,13 +134,13 @@ public class DashboardService {
                     .findFirst()
                     .orElse(null);
 
-            int percentualProgresso = 0;
             if (progresso != null) {
-                // Quiz já foi completado = 100%
-                percentualProgresso = 100;
+                // Quiz concluído - usar construtor específico
+                return new QuizResumoDTO(quiz.getId(), quiz.getTitulo(), quiz.getCategoria(), progresso.getPontosGanhos());
+            } else {
+                // Quiz novo - usar construtor para novo
+                return new QuizResumoDTO(quiz.getId(), quiz.getTitulo(), quiz.getCategoria());
             }
-
-            return new QuizResumoDTO(quiz.getId(), quiz.getTitulo(), quiz.getCategoria(), percentualProgresso);
         }).collect(Collectors.toList());
     }
 
@@ -148,10 +148,8 @@ public class DashboardService {
      * Filtra quizzes que são novos para o usuário (nunca foram tentados).
      */
     private List<QuizResumoDTO> filtrarNovosQuizzes(List<QuizResumoDTO> quizzes, Usuario usuario) {
-        List<Long> quizIdsCompletados = progressoRepository.findQuizIdsCompletadosByUsuario(usuario);
-        
         return quizzes.stream()
-                .filter(quiz -> !quizIdsCompletados.contains(quiz.getId()))
+                .filter(QuizResumoDTO::isNovo)
                 .collect(Collectors.toList());
     }
 
@@ -161,9 +159,9 @@ public class DashboardService {
      * Pode ser expandido no futuro para suportar salvamento de progresso parcial.
      */
     private List<QuizResumoDTO> filtrarQuizzesEmProgresso(List<QuizResumoDTO> quizzes, Usuario usuario) {
-        // Por enquanto retorna lista vazia, pois só salvamos quizzes completos
-        // No futuro, pode verificar quizzes iniciados mas não finalizados
-        return new ArrayList<>();
+        return quizzes.stream()
+                .filter(QuizResumoDTO::isEmProgresso)
+                .collect(Collectors.toList());
     }
 
     /**
