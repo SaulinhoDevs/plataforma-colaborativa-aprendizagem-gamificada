@@ -1,8 +1,8 @@
 package com.aprendizagem.project.repository;
 
 import com.aprendizagem.project.model.Quiz;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 

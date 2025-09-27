@@ -4,6 +4,7 @@ import com.aprendizagem.project.dto.DashboardDataDTO;
 import com.aprendizagem.project.model.Usuario;
 import com.aprendizagem.project.repository.UsuarioRepository;
 import com.aprendizagem.project.service.DashboardService;
+import com.aprendizagem.project.service.NotificacaoService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,12 +19,15 @@ import java.security.Principal;
 public class DashboardController {
 
     private final UsuarioRepository usuarioRepository;
-    private final DashboardService dashboardService; // NOVO: Service para lógica de dashboard
+    private final DashboardService dashboardService;
+    private final NotificacaoService notificacaoService; // NOVO: Service para lógica de dashboard
 
     public DashboardController(UsuarioRepository usuarioRepository,
-                               DashboardService dashboardService) {
+                               DashboardService dashboardService,
+                               NotificacaoService notificacaoService) {
         this.usuarioRepository = usuarioRepository;
         this.dashboardService = dashboardService;
+        this.notificacaoService = notificacaoService;
     }
 
     @GetMapping("/dashboard")
@@ -38,6 +42,9 @@ public class DashboardController {
 
         // 3. Passa os dados para a view
         model.addAttribute("dashboardData", dashboardData);
+        // Notificações
+        model.addAttribute("unreadNotificationsCount", notificacaoService.contarNaoLidas(usuarioLogado));
+        model.addAttribute("notifications", notificacaoService.listarParaUsuario(usuarioLogado));
         return "dashboard";
     }
 }

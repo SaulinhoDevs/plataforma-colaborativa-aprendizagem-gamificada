@@ -67,4 +67,10 @@ public interface UsuarioQuizProgressoRepository extends JpaRepository<UsuarioQui
     @Query("SELECT p.usuario, SUM(p.pontosGanhos) as totalPontos FROM UsuarioQuizProgresso p " +
            "GROUP BY p.usuario ORDER BY totalPontos DESC")
     List<Object[]> findTopUsuariosPorPontos();
+
+@Query("SELECT p.usuario, SUM(p.pontosGanhos) as totalPontos FROM UsuarioQuizProgresso p "+
+       "WHERE p.concluidoEm BETWEEN :inicio AND :fim GROUP BY p.usuario ORDER BY totalPontos DESC")
+List<Object[]> findTopUsuariosPorPontosNoPeriodo(@Param("inicio") LocalDateTime inicio,
+                                                 @Param("fim") LocalDateTime fim);
+
 }

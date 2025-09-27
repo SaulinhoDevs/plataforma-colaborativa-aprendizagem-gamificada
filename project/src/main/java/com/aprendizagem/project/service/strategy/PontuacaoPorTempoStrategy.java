@@ -1,7 +1,7 @@
 package com.aprendizagem.project.service.strategy;
 
 import com.aprendizagem.project.model.UsuarioQuizProgresso;
-import org.springframework.beans.factory.annotation.Qualifier; // ADICIONADO
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;

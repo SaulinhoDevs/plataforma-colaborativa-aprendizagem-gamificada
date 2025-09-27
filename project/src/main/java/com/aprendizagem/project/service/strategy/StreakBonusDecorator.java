@@ -3,7 +3,7 @@ package com.aprendizagem.project.service.strategy;
 import com.aprendizagem.project.model.Usuario;
 import com.aprendizagem.project.model.UsuarioQuizProgresso;
 import com.aprendizagem.project.repository.UsuarioQuizProgressoRepository;
-import org.springframework.beans.factory.annotation.Qualifier; // ADICIONADO: Importação que faltava
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;

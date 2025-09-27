@@ -23,7 +23,7 @@ public class PerfilController {
     private final UsuarioQuizProgressoRepository progressoRepository; // ADICIONADO
 
     public PerfilController(UsuarioRepository usuarioRepository,
-                           UsuarioQuizProgressoRepository progressoRepository) {
+                            UsuarioQuizProgressoRepository progressoRepository) {
         this.usuarioRepository = usuarioRepository;
         this.progressoRepository = progressoRepository;
     }
@@ -45,12 +45,12 @@ public class PerfilController {
      */
     private PerfilDTO montarPerfilComDadosReais(Usuario usuario) {
         PerfilDTO perfilDTO = new PerfilDTO();
-        
+
         // 1. Dados básicos do usuário
         perfilDTO.setNome(usuario.getNome());
         perfilDTO.setEmail(usuario.getEmail());
-        perfilDTO.setAvatarUrl("https://placehold.co/120x120/9333ea/FFFFFF?text=" + 
-                              usuario.getNome().substring(0, 1).toUpperCase());
+        perfilDTO.setAvatarUrl("https://placehold.co/120x120/9333ea/FFFFFF?text=" +
+                usuario.getNome().substring(0, 1).toUpperCase());
 
         // 2. DADOS REAIS calculados do banco de dados
         Integer pontosTotais = progressoRepository.calcularPontosTotais(usuario);
@@ -65,9 +65,9 @@ public class PerfilController {
         perfilDTO.setNivel(calcularNivelPorPontos(perfilDTO.getPontosTotais()));
 
         // 4. Conquistas dinâmicas baseadas no progresso real
-        perfilDTO.setConquistasIcones(calcularConquistasReais(perfilDTO.getQuizzesConcluidos(), 
-                                                             perfilDTO.getPrecisaoMedia(),
-                                                             perfilDTO.getPontosTotais()));
+        perfilDTO.setConquistasIcones(calcularConquistasReais(perfilDTO.getQuizzesConcluidos(),
+                perfilDTO.getPrecisaoMedia(),
+                perfilDTO.getPontosTotais()));
 
         return perfilDTO;
     }
